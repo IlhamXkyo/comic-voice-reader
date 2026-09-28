@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller / Build
+build/
+dist/
+*.spec
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# Local User Settings
+settings.json
+.comic_voice_reader/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/app/*.iml

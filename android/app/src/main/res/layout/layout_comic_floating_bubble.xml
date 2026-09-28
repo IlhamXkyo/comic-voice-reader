@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="68dp"
+    android:layout_height="68dp"
+    android:padding="4dp">
+
+    <!-- Bayangan Hitam Komik (Drop Shadow) -->
+    <View
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|end"
+        android:background="#18181B" />
+
+    <!-- Lingkaran Utama Balon Suara Komik Kuning -->
+    <RelativeLayout
+        android:id="@+id/bubble_container"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|start"
+        android:background="#FFE135">
+
+        <!-- Ikon Pengeras Suara -->
+        <ImageView
+            android:id="@+id/icon_speaker"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:src="@android:drawable/ic_btn_speak_now" />
+
+    </RelativeLayout>
+</FrameLayout>
