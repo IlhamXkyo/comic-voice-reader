@@ -82,16 +82,7 @@ class ComicVoiceApp:
         if self.watcher:
             self.watcher.set_paused(True)
         current_zone = self.config.get("reading_zone", {})
-        h_bar = getattr(self.frame_window, "header_height", 52)
-        new_x = max(0, current_zone.get("x", 350) - 8)
-        new_y = max(0, current_zone.get("y", 100) - h_bar - 8)
-        new_w = current_zone.get("width", 650) + 16
-        new_h = current_zone.get("height", 850) + h_bar + 16
-
-        self.frame_window.setGeometry(new_x, new_y, new_w, new_h)
-        self.frame_window.lbl_size.setText(f"{new_w} x {new_h}")
-        self.frame_window.show()
-        self.frame_window.raise_()
+        self.frame_window.reposition_to_zone(current_zone)
 
     def on_voice_changed(self, idx: int):
         self.tts.set_voice(idx)

@@ -15,13 +15,14 @@ from .comic_theme import (
     COMIC_YELLOW, COMIC_INK, COMIC_WHITE,
     COMIC_GREEN, COMIC_RED, QSS_COMIC_THEME
 )
+from ..models import ReadingZone
 
 class SelectionFrameWindow(QWidget):
     started = pyqtSignal(dict)
 
-    def __init__(self, initial_zone: dict):
+    def __init__(self, initial_zone=None):
         super().__init__()
-        self.zone = initial_zone
+        self.zone = ReadingZone.from_dict(initial_zone)
         self.resizing = False
         self.moving = False
         self.resize_mode = None  # 'left', 'right', 'top', 'bottom', 'top_left', dst.
@@ -43,10 +44,10 @@ class SelectionFrameWindow(QWidget):
         self.setStyleSheet(QSS_COMIC_THEME)
         self.setMouseTracking(True)
 
-        x = self.zone.get("x", 350)
-        y = self.zone.get("y", 100)
-        w = self.zone.get("width", 650)
-        h = self.zone.get("height", 850)
+        x = self.zone.x
+        y = self.zone.y
+        w = self.zone.width
+        h = self.zone.height
         self.setGeometry(x, y, w, h)
 
         # Bilah kontrol atas
@@ -274,3 +275,19 @@ class SelectionFrameWindow(QWidget):
         self.moving = False
         self.resize_mode = "none"
         self.setCursor(Qt.CursorShape.ArrowCursor)
+
+    def reposition_to_zone(self, zone):
+        """Memposisikan ulang bingkai seleksi secara terenkapsulasi."""
+        if hasattr(zone, "to_dict"):
+            zone = zone.to_dict()
+        zone_dict = zone or {}
+        new_x = max(0, zone_dict.get("x", 350) - 8)
+        new_y = max(0, zone_dict.get("y", 100) - self.header_height - 8)
+        new_w = zone_dict.get("width", 650) + 16
+        new_h = zone_dict.get("height", 850) + self.header_height + 16
+
+        self.setGeometry(new_x, new_y, new_w, new_h)
+        if hasattr(self, "lbl_size"):
+            self.lbl_size.setText(f"{new_w} x {new_h}")
+        self.show()
+        self.raise_()

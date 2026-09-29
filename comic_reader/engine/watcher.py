@@ -11,15 +11,16 @@ from .scroll_detector import ScrollDetector
 from .ocr_engine import ComicOCREngine
 from .deduplicator import TextDeduplicator
 from .tts_player import ComicTTSPlayer
+from ..models import ReadingZone
 
 class ScreenWatcherWorker(QThread):
     text_detected = pyqtSignal(list)
     speaking_state_changed = pyqtSignal(bool)
     status_changed = pyqtSignal(str)
 
-    def __init__(self, zone: dict, tts_player: ComicTTSPlayer, debounce_ms=220):
+    def __init__(self, zone, tts_player: ComicTTSPlayer, debounce_ms=220):
         super().__init__()
-        self.zone = zone
+        self.zone = ReadingZone.from_dict(zone)
         self.tts = tts_player
         self.running = True
         self.is_paused = False
@@ -32,19 +33,19 @@ class ScreenWatcherWorker(QThread):
         self.tts.on_start_speech = self._on_tts_start
         self.tts.on_end_speech = self._on_tts_end
 
-    def update_zone(self, new_zone: dict):
-        self.zone = new_zone
+    def update_zone(self, new_zone):
+        self.zone = ReadingZone.from_dict(new_zone)
         self.detector.reset()
-        print(f"Area bidik diperbarui: {self.zone}")
+        print(f"Area bidik diperbarui: {self.zone.to_dict()}")
 
     def trigger_instant_read(self):
         if self.is_paused:
             return
         frame = self.capturer.capture_zone(
-            self.zone.get("x", 0),
-            self.zone.get("y", 0),
-            self.zone.get("width", 500),
-            self.zone.get("height", 600)
+            self.zone.x,
+            self.zone.y,
+            self.zone.width,
+            self.zone.height
         )
         texts = self.ocr.extract_texts(frame)
         new_texts = self.dedup.filter_new_texts(texts)
@@ -80,10 +81,10 @@ class ScreenWatcherWorker(QThread):
 
             try:
                 frame = self.capturer.capture_zone(
-                    self.zone.get("x", 0),
-                    self.zone.get("y", 0),
-                    self.zone.get("width", 500),
-                    self.zone.get("height", 600)
+                    self.zone.x,
+                    self.zone.y,
+                    self.zone.width,
+                    self.zone.height
                 )
 
                 # Deteksi apakah layar baru saja berhenti bergerak
@@ -101,6 +102,8 @@ class ScreenWatcherWorker(QThread):
 
             except Exception as e:
                 print(f"Kesalahan pada loop pengawas layar: {e}")
+                self.status_changed.emit("Gangguan penangkap layar, memulihkan...")
+                time.sleep(0.5)
 
             time.sleep(0.06)
 

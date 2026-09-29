@@ -4,6 +4,7 @@ import time
 import queue
 import asyncio
 import tempfile
+import shutil
 import threading
 from typing import Callable, Optional
 
@@ -135,7 +136,10 @@ class ComicTTSPlayer:
 
     async def _generate_audio_edge(self, text: str, output_path: str):
         voice_info = AVAILABLE_VOICES[self.voice_index]
-        voice_id = voice_info["id"]
+        if voice_info.get("type") == "edge":
+            voice_id = voice_info["id"]
+        else:
+            voice_id = "id-ID-ArdiNeural"
         rate_str = self._format_rate_str()
         vol_str = self._format_volume_str()
 
@@ -202,6 +206,10 @@ class ComicTTSPlayer:
 
         return None
 
+    def _synthesize_speech(self, text: str) -> Optional[str]:
+        """Alias untuk sintesis audio edge (kompatibilitas backward)"""
+        return self._synthesize_speech_edge(text)
+
     def _worker_loop(self):
         while not self.is_stopped:
             try:
@@ -259,3 +267,8 @@ class ComicTTSPlayer:
     def shutdown(self):
         self.is_stopped = True
         self.clear_queue()
+        if hasattr(self, "temp_dir") and os.path.exists(self.temp_dir):
+            try:
+                shutil.rmtree(self.temp_dir, ignore_errors=True)
+            except Exception:
+                pass

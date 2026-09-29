@@ -1,5 +1,6 @@
 import os
 import json
+from .models import ReadingZone
 
 CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".comic_voice_reader")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "settings.json")
