@@ -8,7 +8,7 @@ from PyQt6.QtCore import Qt, QPoint, pyqtSignal, QTimer
 from PyQt6.QtGui import QPainter, QPen, QColor, QBrush, QFont, QPolygon
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QSlider, QComboBox, QFrame
+    QPushButton, QSlider, QComboBox, QFrame, QApplication
 )
 
 from .comic_theme import (
@@ -219,7 +219,39 @@ class ComicControlPanel(QWidget):
         self.pause_toggled.emit()
 
     def set_status_text(self, text: str):
-        self.lbl_status.setText(f"Status: {text}")
+        clean_text = text.strip()
+        if "Membaca" in clean_text:
+            bg_color = COMIC_GREEN
+            txt_color = "#FFFFFF"
+        elif "Dijeda" in clean_text:
+            bg_color = "#F59E0B"
+            txt_color = "#FFFFFF"
+        elif "Gangguan" in clean_text or "Error" in clean_text:
+            bg_color = COMIC_RED
+            txt_color = "#FFFFFF"
+        else:
+            bg_color = COMIC_YELLOW
+            txt_color = COMIC_INK
+
+        self.lbl_status.setText(f"Status: {clean_text}")
+        self.lbl_status.setStyleSheet(f"""
+            background-color: {bg_color};
+            color: {txt_color};
+            border: 2px solid {COMIC_INK};
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-weight: 800;
+        """)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            self.hide()
+            event.accept()
+        elif event.key() == Qt.Key.Key_Space:
+            self.on_pause_clicked()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
 
 class FloatingBubbleWidget(QWidget):
@@ -313,7 +345,15 @@ class FloatingBubbleWidget(QWidget):
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self.drag_position)
+            new_pos = event.globalPosition().toPoint() - self.drag_position
+            screen = self.screen() or QApplication.primaryScreen()
+            if screen:
+                geom = screen.availableGeometry()
+                safe_x = max(geom.left(), min(new_pos.x(), geom.right() - self.width()))
+                safe_y = max(geom.top(), min(new_pos.y(), geom.bottom() - self.height()))
+                self.move(safe_x, safe_y)
+            else:
+                self.move(new_pos)
             event.accept()
 
     def mouseReleaseEvent(self, event):

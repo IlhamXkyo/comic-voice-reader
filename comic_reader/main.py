@@ -7,10 +7,12 @@ dan pemutar audio instan 0ms.
 
 import sys
 import os
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
 from .config import load_config, save_config
+from .models import ReadingZone
 from .ui.selection_frame import SelectionFrameWindow
 from .ui.floating_widget import FloatingBubbleWidget
 from .engine.tts_player import ComicTTSPlayer
@@ -122,6 +124,14 @@ class ComicVoiceApp:
         QApplication.quit()
 
 def main():
+    # Optimasi High-DPI untuk resolusi layar Windows tinggi
+    try:
+        QApplication.setHighDpiScaleFactorRoundingPolicy(
+            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        )
+    except Exception:
+        pass
+
     app = QApplication(sys.argv)
     app.setApplicationName("ComicVoice Reader")
     comic_app = ComicVoiceApp()

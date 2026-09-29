@@ -4,7 +4,16 @@ Menyediakan tipe data yang tervalidasi dan Single Source of Truth (SSOT).
 """
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, Any
+
+class AppStatus(str, Enum):
+    """Status siklus hidup aplikasi ComicVoice Reader."""
+    CONFIGURING = "Mengatur Bingkai..."
+    MONITORING = "Memantau Gulir..."
+    READING = "Sedang Membaca..."
+    PAUSED = "Dijeda"
+    ERROR = "Gangguan Deteksi"
 
 @dataclass(frozen=True)
 class ReadingZone:
@@ -21,6 +30,14 @@ class ReadingZone:
             "width": self.width,
             "height": self.height
         }
+
+    def clamp_to_screen(self, screen_w: int, screen_h: int) -> "ReadingZone":
+        """Memastikan zona bidik tidak melompat ke luar dimensi layar fisik."""
+        safe_w = min(self.width, screen_w)
+        safe_h = min(self.height, screen_h)
+        safe_x = max(0, min(self.x, screen_w - safe_w))
+        safe_y = max(0, min(self.y, screen_h - safe_h))
+        return ReadingZone(x=safe_x, y=safe_y, width=safe_w, height=safe_h)
 
     @classmethod
     def from_dict(cls, data: Any, default_x: int = 350, default_y: int = 100,

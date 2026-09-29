@@ -291,3 +291,28 @@ class SelectionFrameWindow(QWidget):
             self.lbl_size.setText(f"{new_w} x {new_h}")
         self.show()
         self.raise_()
+
+    def keyPressEvent(self, event):
+        """Dukungan shortcut keyboard untuk resize cepat dan konfirmasi."""
+        key = event.key()
+        if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Space):
+            self.on_start_clicked()
+            event.accept()
+        elif key == Qt.Key.Key_Escape:
+            self.hide()
+            event.accept()
+        elif key == Qt.Key.Key_Left:
+            self.adjust_size(dw=-20, dh=0)
+            event.accept()
+        elif key == Qt.Key.Key_Right:
+            self.adjust_size(dw=20, dh=0)
+            event.accept()
+        elif key == Qt.Key.Key_Up:
+            self.adjust_size(dw=0, dh=-20)
+            event.accept()
+        elif key == Qt.Key.Key_Down:
+            self.adjust_size(dw=0, dh=20)
+            event.accept()
+        else:
+            super().keyPressEvent(event)
+
