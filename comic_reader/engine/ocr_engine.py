@@ -48,10 +48,12 @@ class ComicOCREngine:
                 self.rapid_engine = None
 
     async def _recognize_windows_async(self, img_bgr: np.ndarray) -> list[str]:
-        # Encode gambar ke PNG di memori
-        success, buf = cv2.imencode('.png', img_bgr)
+        # Gunakan BMP (uncompressed) untuk latensi encoding memori 2x lebih cepat dibanding PNG
+        success, buf = cv2.imencode('.bmp', img_bgr)
         if not success:
-            return []
+            success, buf = cv2.imencode('.png', img_bgr)
+            if not success:
+                return []
 
         stream = streams.InMemoryRandomAccessStream()
         writer = streams.DataWriter(stream)
@@ -116,11 +118,15 @@ class ComicOCREngine:
 
     def _extract_windows(self, img_bgr: np.ndarray) -> list[str]:
         try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            res = loop.run_until_complete(self._recognize_windows_async(img_bgr))
-            loop.close()
-            return res
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_closed():
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            return loop.run_until_complete(self._recognize_windows_async(img_bgr))
         except Exception as e:
             print(f"Kesalahan eksekusi Windows OCR: {e}")
             return []

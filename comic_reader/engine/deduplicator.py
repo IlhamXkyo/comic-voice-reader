@@ -36,12 +36,19 @@ class TextDeduplicator:
         if norm_text in self.normalized_history:
             return True
 
-        # Cek kesamaan string menggunakan SequenceMatcher
+        # Cek kesamaan string menggunakan SequenceMatcher dengan batas panjang
         for prev in self.normalized_history:
-            # Jika teks saat ini adalah substring signifikan dari teks sebelumnya atau sebaliknya
-            if len(norm_text) > 8 and len(prev) > 8:
-                if norm_text in prev or prev in norm_text:
-                    return True
+            min_len = min(len(norm_text), len(prev))
+            max_len = max(len(norm_text), len(prev))
+            length_ratio = min_len / max_len if max_len > 0 else 0.0
+
+            # Substring hanya dianggap duplikat jika panjangnya hampir identik (variasi kecil OCR)
+            if length_ratio >= 0.85 and (norm_text in prev or prev in norm_text):
+                return True
+
+            # Abaikan SequenceMatcher jika perbedaan panjang sudah melebihi ambang batas toleransi
+            if length_ratio < self.similarity_threshold:
+                continue
 
             similarity = difflib.SequenceMatcher(None, norm_text, prev).ratio()
             if similarity >= self.similarity_threshold:

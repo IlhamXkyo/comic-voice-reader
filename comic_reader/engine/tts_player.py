@@ -111,6 +111,12 @@ class ComicTTSPlayer:
                 pass
         if self._active_sapi_voice:
             try:
+                if HAS_WIN32COM:
+                    import pythoncom
+                    try:
+                        pythoncom.CoInitialize()
+                    except Exception:
+                        pass
                 # SVSFPurgeBeforeSpeak = 2
                 self._active_sapi_voice.Speak("", 2)
             except Exception:
