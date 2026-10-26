@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 
 # Pastikan path modul terbaca
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from comic_reader.engine.deduplicator import TextDeduplicator
 from comic_reader.engine.ocr_engine import ComicOCREngine

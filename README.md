@@ -56,7 +56,7 @@ pip install -r requirements.txt
 
 ### 3. Jalankan Pengujian
 ```bash
-python test_advanced_audit.py
+python -m unittest discover tests
 ```
 
 ### 4. Mulai Aplikasi
